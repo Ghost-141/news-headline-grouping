@@ -4,7 +4,10 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import random
 import ollama
-from prompts.prompt_v1 import prompt
+import logging
+from prompts.prompt_v2 import prompt
+
+logger = logging.getLogger(__name__)
 
 
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
@@ -34,13 +37,13 @@ def get_model():
     Ensures the model is available locally, then loads it.
     """
     if not os.path.exists(LOCAL_DIR) or not os.listdir(LOCAL_DIR):
-        print("Downloading full model from HF...")
+        logger.info("Downloading {MODEL_NAME} model from HF...")
         model = SentenceTransformer(MODEL_NAME)
         model.save(LOCAL_DIR)
     else:
-        print("Loading model from local directory...")
+        logger.info(f"Loading {MODEL_NAME} model from local directory...")
         model = SentenceTransformer(LOCAL_DIR)
-        print("✔ Model loaded successfully!")
+        # logger.info("✔ Model loaded successfully!")
     return model
 
 
@@ -100,12 +103,12 @@ def find_similarity_pair(embeddings, news_data):
                 final_news.append(article)
 
         final_news = final_news[:10]
-        print("Found similar news - grouped together:")
+        logger.info("Found similar news - grouping together...")
         return True, final_news
     else:
         final_news = news_data.copy()
         random.shuffle(final_news)
-        print("No similar news - shuffled:")
+        logger.info("No similar news found")
         return False, final_news
 
 
@@ -128,8 +131,8 @@ def group_data(similarity: bool, final_news: list):
     full_prompt = prompt.format(json_template=json_template, news_text=news_text)
 
     if similarity:
-        response = ollama.generate(model="qwen3:1.7b", prompt=full_prompt)
-        print("Ollama result:")
+        response = ollama.generate(model="llama3.2:3b", prompt=full_prompt)
+        logger.info("Genearing Response from Ollama")
         return response["response"]
 
     else:
