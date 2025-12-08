@@ -13,5 +13,5 @@ wheels/
 
 # Database Files
 *.json
-*.sql
+
 

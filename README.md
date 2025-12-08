@@ -1,161 +1,133 @@
-# News Classification System
+# Breaking News Scraper
 
-A Bengali news classification system that groups similar news articles using semantic similarity and LLM-based clustering.
+A Python-based news scraping system that collects articles from Bangladeshi news websites and automatically detects breaking news using AI-powered similarity analysis.
 
 ## Features
 
-- **Semantic Similarity Detection**: Uses sentence transformers to find similar news articles
-- **Intelligent Grouping**: Groups articles with nearly identical meanings together
-- **LLM-powered Classification**: Uses Ollama for structured JSON output
-- **Automatic Fallback**: Shuffles articles when no similarities are found
+- **Multi-source scraping**: Jamuna TV, Somoy TV, Independent TV
+- **Breaking news detection**: AI-powered classification using Ollama embeddings
+- **Database storage**: MySQL integration with duplicate prevention
 
 ## Project Structure
 
 ```
-news_classification/
-├── main.py                 # Main pipeline script
-├── utils/
-│   ├── helper.py          # Core utility functions
-│   └── news_summary.py    # Database extraction utilities
-├── prompts/
-│   └── prompt_v1.py       # LLM prompt templates
-├── models/                # Local sentence transformer models
-├── db_data.json          # Input news data
-├── grouped_news.json     # Output results
-└── requirements files
+Scrapping Codes/
+├── scrappers/           # News scraper modules
+│   ├── chrome_driver.py # Selenium WebDriver utilities
+│   ├── detector.py      # Breaking news detection logic
+│   ├── scrape_jamuna.py # Jamuna TV scraper
+│   ├── scrape_somoy.py  # Somoy TV scraper
+│   └── scrape_independent.py # Independent TV scraper
+├── utils/               # Utility functions
+│   ├── db.py           # Database operations
+│   ├── query_db.py     # Database queries
+│   └── sendwhatsapp_func.py # WhatsApp notifications
+├── scrape_all_news.py  # Main scraping orchestrator
+├── breaking_model.py   # Breaking news model training
+└── pyproject.toml      # Project dependencies
 ```
 
 ## Setup
 
 ### Prerequisites
 
-- Python 3.11+
-- Ollama installed and running locally
-- Required Python packages (see installation)
+- Python 3.13+
+- MySQL Server
+- Chrome Browser
+- Ollama (for Vector Embeddings)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd news_classification
+   cd "Scrapping Codes"
    ```
 
 2. **Install dependencies**
    ```bash
-   pip install sentence-transformers numpy ollama faiss-cpu
+   uv sync
    ```
 
-3. **Setup Ollama**
+3. **Setup MySQL database**
+   Import the sql table from the admin panel with name *news_automation*
+
+4. **Install Ollama and embedding model**
    ```bash
-   # Install and start Ollama
-   ollama serve
-   
-   # Pull required model
-   ollama pull qwen3:1.7b
+   # Install Ollama (https://ollama.ai)
+   ollama pull embeddinggemma:300m
    ```
 
-4. **Prepare data**
-   - Place your news data in `db_data.json` format:
-   ```json
-   [
-     {
-       "id": 1,
-       "title": "News title in Bengali",
-       "newspaper_name": "Source name",
-       "link": "https://example.com",
-       "published_time": "Time string",
-       "scrape_id": 1
-     }
-   ]
+5. **Configure database connection**
+   Update `utils/db.py` with your MySQL credentials:
+   ```python
+   conn = mysql.connector.connect(
+       host="localhost",
+       user="your_username", 
+       password="your_password",
+       database="news_automation"
+   )
    ```
 
 ## Usage
 
-### Basic Usage
-
+### Run All Scrapers
 ```bash
-python main.py
+python scrape_all_news.py
 ```
 
-### Pipeline Steps
-
-1. **Data Loading**: Reads news articles from `db_data.json`
-2. **Embedding Generation**: Creates semantic embeddings using sentence transformers
-3. **Similarity Detection**: Finds articles with similarity > 0.8 threshold
-4. **Grouping**: Groups similar articles together, shuffles if no similarities found
-5. **LLM Classification**: Uses Ollama to create structured JSON output
-6. **Output**: Saves results to `grouped_news.json`
-
-### Output Format
-
-```json
-{
-  "Similar": [
-    {
-      "items": [
-        {"id": 4, "title": "Similar news 1"},
-        {"id": 23, "title": "Similar news 2"}
-      ]
-    }
-  ],
-  "Unique": [
-    {"id": 2, "title": "Unique news article"}
-  ]
-}
+### Run Individual Scrapers
+```bash
+python -m scrappers.scrape_somoy
+python -m scrappers.scrape_jamuna
+python -m scrappers.scrape_independent
 ```
 
-## Configuration
-
-### Similarity Threshold
-Adjust in `utils/helper.py`:
-```python
-similarity_threshold = 0.8  # Change as needed
+### Query Database
+```bash
+python -m utils.query_db
 ```
 
-### Model Selection
-Change the sentence transformer model in `utils/helper.py`:
-```python
-MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+## Breaking News Detection
+
+The system uses AI-powered similarity analysis to detect breaking news:
+
+- **Threshold**: Similarity score > 0.50 = Breaking news
+- **Keywords**: Predefined Bengali keywords for critical events
+- **Model**: Ollama embeddinggemma:300m for text embeddings
+- **Output**: Returns 1 (breaking) or 0 (normal)
+
+### Breaking News Keywords
+- হত্যা (murder), দুর্ঘটনা (accident), মৃত্যু (death)
+- আগুন (fire), বিস্ফোরণ (explosion), ভূমিকম্প (earthquake)
+- গ্রেফতার (arrest), বিক্ষোভ (protest), সংঘর্ষ (clash)
+- বন্যা (flood), ঝড় (storm), জরুরি (emergency)
+
+## Database Schema
+
+```sql
+CREATE TABLE news (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    source VARCHAR(100),
+    title TEXT,
+    summary TEXT,
+    category VARCHAR(100),
+    link TEXT,
+    publish_time VARCHAR(100),
+    is_breaking TINYINT DEFAULT 0,
+    sent_status TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-### Ollama Model
-Update the model in `utils/helper.py`:
-```python
-ollama.generate(model="qwen3:1.7b", prompt=full_prompt)
-```
+## Dependencies
 
-## Functions
-
-### Core Functions
-
-- `read_file(file_path)`: Load news data from JSON
-- `get_embedding(titles)`: Generate semantic embeddings
-- `find_similarity_pair(embeddings, news_data)`: Find and group similar articles
-- `group_data(similarity, final_news)`: Use LLM for final classification
-
-## Requirements
-
-- `sentence-transformers`: For semantic embeddings
-- `numpy`: For numerical operations
-- `ollama`: For local LLM integration
-
-## Troubleshooting
-
-### Common Issues
+- **selenium**: Web scraping automation
+- **mysql-connector**: Database connectivity
+- **ollama**: AI embeddings for breaking news detection
+- **numpy**: Numerical computations
+- **beautifulsoup4**: HTML parsing
+- **requests**: HTTP requests
 
 
-1. **Model Download Issues**
-   - Models are automatically downloaded to `./models/` directory
-   - Ensure sufficient disk space (>500MB)
-
-2. **Memory Issues**
-   - Reduce batch size for large datasets
-   - Use smaller sentence transformer models
-
-### Performance Tips
-
-- Use GPU-enabled sentence transformers for faster processing
-- Adjust similarity threshold based on your data
-- Consider using approximate similarity search for large datasets
 
