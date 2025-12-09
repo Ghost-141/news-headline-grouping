@@ -11,7 +11,7 @@ cursor = conn.cursor(dictionary=True)
 def get_all_news():
     """Get all news with id, title, publish time, and source"""
     try:
-        sql = "SELECT id, title, publish_time, source FROM news ORDER BY id DESC"
+        sql = "SELECT id, title, link, publish_time, source FROM news ORDER BY id DESC"
         cursor.execute(sql)
         results = cursor.fetchall()
         return results

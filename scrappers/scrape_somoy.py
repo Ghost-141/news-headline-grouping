@@ -6,7 +6,7 @@ from scrappers.chrome_driver import (
     get_element_attribute,
 )
 from utils.db import save_to_db
-from scrappers.detector import is_breaking_news
+from utils.news_detector import is_breaking_news
 import time
 
 
@@ -54,7 +54,6 @@ def scrape_somoy():
     seen_titles = set()
 
     try:
-        print("Navigating to Somoy News...")
         driver.get("https://www.somoynews.tv/read/recent")
         time.sleep(3)
 
@@ -80,6 +79,8 @@ def scrape_somoy():
                 if link and not link.startswith("http"):
                     link = "https://www.somoynews.tv" + link
 
+                print(f"\nProcessing: {title}")
+
                 is_breaking = is_breaking_news(title, subtitle, publish_time)
 
                 save_to_db(
@@ -99,7 +100,7 @@ def scrape_somoy():
     finally:
         driver.quit()
 
-    print(f"\n✅ Saved news items to database")
+    print(f"\n✅ Saved Somoy TV news to database")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 from scrappers.chrome_driver import get_chrome_driver
 from scrappers.utils import save_to_db
-from detector import is_breaking_news
+from utils.news_detector import is_breaking_news
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
 import time

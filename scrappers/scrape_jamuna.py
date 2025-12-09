@@ -6,7 +6,7 @@ from scrappers.chrome_driver import (
     get_element_attribute,
 )
 from utils.db import save_to_db
-from scrappers.detector import is_breaking_news
+from utils.news_detector import is_breaking_news
 import time
 import random
 
@@ -35,6 +35,7 @@ def scrape_jamuna():
         time.sleep(random.uniform(3, 5))
 
         items = wait_for_elements(driver, "div.desktopSectionLead")
+        print(f"Found {len(items)} potential news items")
 
         for item in items:
             try:
@@ -43,6 +44,8 @@ def scrape_jamuna():
                 publish_time = get_element_text(item, "p.desktopTime")
 
                 summary = extract_summary_from_item(item)
+
+                print(f"\nProcessing: {title}")
 
                 is_breaking = is_breaking_news(title, summary, publish_time)
 
@@ -56,8 +59,6 @@ def scrape_jamuna():
                     is_breaking=is_breaking,
                 )
 
-                print(f"Scraped: {title}")
-
             except Exception as e:
                 print(f"Error: {e}")
                 continue
@@ -65,7 +66,7 @@ def scrape_jamuna():
     finally:
         driver.quit()
 
-    print(f"\n✅ Saved news items to database")
+    print(f"\n✅ Saved Jamuna TV News to database")
 
 
 if __name__ == "__main__":

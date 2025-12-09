@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 from scrappers.chrome_driver import get_chrome_driver
 from utils.db import save_to_db
-from scrappers.detector import is_breaking_news
+from utils.news_detector import is_breaking_news
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
 import time
@@ -88,7 +88,7 @@ def scrape_independent():
     finally:
         driver.quit()
 
-    print(f"\n✅ Saved news items to database")
+    print(f"\n✅ Saved Independent TV news to database")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
-# Breaking News Scraping & Detection
+# Breaking News Scraper
 
 A Python-based news scraping system that collects articles from Bangladeshi news websites and automatically detects breaking news using AI-powered similarity analysis.
 
 ## Features
 
 - **Multi-source scraping**: Jamuna TV, Somoy TV, Independent TV
-- **Breaking news detection**: AI-powered classification using Ollama based embedding model
+- **Breaking news detection**: AI-powered classification using Ollama embeddings
 - **Database storage**: MySQL integration with duplicate prevention
 
 ## Project Structure
@@ -14,16 +14,19 @@ A Python-based news scraping system that collects articles from Bangladeshi news
 Scrapping Codes/
 ├── scrappers/           # News scraper modules
 │   ├── chrome_driver.py # Selenium WebDriver utilities
-│   ├── detector.py      # Breaking news detection logic
 │   ├── scrape_jamuna.py # Jamuna TV scraper
 │   ├── scrape_somoy.py  # Somoy TV scraper
-│   └── scrape_independent.py # Independent TV scraper
+│   ├── scrape_independent.py # Independent TV scraper
+│   └── scrape_channel24.py # Channel 24 scraper
 ├── utils/               # Utility functions
 │   ├── db.py           # Database operations
-│   ├── query_db.py     # Database queries
-│   └── sendwhatsapp_func.py # WhatsApp notifications
-├── scrape_all_news.py  # Main scraping orchestrator
-├── breaking_model.py   # Breaking news model training
+│   ├── news_detector.py # Breaking news detection logic
+│   ├── send_breaking_news.py # Breaking news sender
+│   └── send_message.py # WhatsApp message utilities
+├── main.py             # Main application entry point
+├── query_db.py         # Database query utilities
+├── test_breaking_news.py # Breaking news testing
+├── news_automation.sql # Database schema
 └── pyproject.toml      # Project dependencies
 ```
 
@@ -50,7 +53,9 @@ Scrapping Codes/
    ```
 
 3. **Setup MySQL database**
-   Import the sql table from the admin panel with name *news_automation*
+   ```bash
+   mysql -u root -p < news_automation.sql
+   ```
 
 4. **Install Ollama and embedding model**
    ```bash
@@ -71,9 +76,9 @@ Scrapping Codes/
 
 ## Usage
 
-### Run All Scrapers
+### Run All Scrapers with Breaking News Detection
 ```bash
-python scrape_all_news.py
+python main.py
 ```
 
 ### Run Individual Scrapers
@@ -83,9 +88,14 @@ python -m scrappers.scrape_jamuna
 python -m scrappers.scrape_independent
 ```
 
+### Send Breaking News to WhatsApp
+```bash
+python -m utils.send_breaking_news
+```
+
 ### Query Database
 ```bash
-python -m utils.query_db
+python query_db.py
 ```
 
 ## Breaking News Detection

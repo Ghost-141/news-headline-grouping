@@ -5,13 +5,11 @@ build/
 dist/
 wheels/
 *.egg-info
-*models
-*.ipynb
 
 # Virtual environments
 .venv
+.env
 
-# Database Files
+# Database
+*.db 
 *.json
-
-
