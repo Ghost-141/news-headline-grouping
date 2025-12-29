@@ -45,3 +45,50 @@ def update_sent_status(news_id):
     except Exception as e:
         print(f"Error updating sent status for ID {news_id}: {e}")
         return False
+
+
+def save_breaking_news_to_queue(news_id, source, title, link, publish_time):
+    """Save breaking news to queue table"""
+    try:
+        sql = """
+        INSERT INTO breaking_news_queue 
+        (news_id, source, title, link, publish_time)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql, (news_id, source, title, link, publish_time))
+        conn.commit()
+        return cursor.lastrowid
+    except mysql.connector.errors.IntegrityError:
+        print(f"Breaking news already in queue: {title}")
+        return None
+    except Exception as e:
+        print(f"Error saving to queue {title}: {e}")
+        return None
+
+
+def get_unsent_breaking_news():
+    """Fetch breaking news from queue that haven't been sent"""
+    try:
+        sql = """SELECT id, news_id, source, title, link, publish_time 
+                 FROM breaking_news_queue 
+                 WHERE sent_status = 0 AND DATE(created_at) = CURDATE()"""
+        cursor.execute(sql)
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error fetching breaking news queue: {e}")
+        return []
+
+
+def update_queue_sent_status(queue_ids):
+    """Update sent_status for multiple queue IDs"""
+    try:
+        if not queue_ids:
+            return True
+        placeholders = ','.join(['%s'] * len(queue_ids))
+        sql = f"UPDATE breaking_news_queue SET sent_status = 1 WHERE id IN ({placeholders})"
+        cursor.execute(sql, tuple(queue_ids))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating queue sent status: {e}")
+        return False
