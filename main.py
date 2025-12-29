@@ -1,7 +1,7 @@
 from scrappers.scrape_jamuna import scrape_jamuna
 from scrappers.scrape_somoy import scrape_somoy
 from scrappers.scrape_independent import scrape_independent
-from utils.send_breaking_news import send_breaking_news
+from utils.filter_similar_news import send_breaking_news
 from utils.news_detector import process_pending_news
 import time
 
@@ -41,4 +41,4 @@ def scrape_all_news():
 if __name__ == "__main__":
     scrape_all_news()
     process_pending_news()  # Check and update breaking news status
-    # send_breaking_news()  # Send breaking news to WhatsApp
+    send_breaking_news()  # Send breaking news to WhatsApp
