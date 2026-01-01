@@ -87,7 +87,7 @@ def scrape_somoy():
                     summary=subtitle,
                     category=category,
                     link=link,
-                    publish_time=publish_time
+                    publish_time=publish_time,
                 )
 
                 time.sleep(1)

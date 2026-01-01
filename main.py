@@ -10,7 +10,7 @@ def scrape_all_news():
     """Run all news scrapers and save to database"""
     print("=" * 50)
     print("Starting news scraping...")
-    print("=" * 50) 
+    print("=" * 50)
 
     try:
         print("\n[1/3] Scraping Jamuna TV...")
@@ -41,4 +41,4 @@ def scrape_all_news():
 if __name__ == "__main__":
     scrape_all_news()
     process_pending_news()  # Check and update breaking news status
-    send_breaking_news()    # Send breaking news to WhatsApp
+    send_breaking_news()  # Send breaking news to WhatsApp
